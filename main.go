@@ -1,38 +1,27 @@
 package main
 
 import (
-	"fmt"
-	"io"
 	"log"
 	"net/http"
+	"os"
+
+	"github.com/nikolasnorth/microservices/handlers"
 )
 
 var PORT = "9090"
 
 func main() {
-	http.HandleFunc("/", handleIndex)
-	http.HandleFunc("/goodbye", handleGoodbye)
+	l := log.New(os.Stdout, "hello-handler:", log.LstdFlags)
+	hh := handlers.NewHello(l)
+	gh := handlers.NewGoodbye(l)
+
+	sm := http.NewServeMux()
+	sm.Handle("/", hh)
+	sm.Handle("/goodbye", gh)
 
 	log.Printf("listening on port %s...", PORT)
-	err := http.ListenAndServe(":"+PORT, nil)
+	err := http.ListenAndServe(":"+PORT, sm)
 	if err != nil {
 		log.Fatal(err)
-	}
-}
-
-func handleGoodbye(w http.ResponseWriter, r *http.Request) {
-	log.Println("goodbye world")
-}
-
-func handleIndex(w http.ResponseWriter, r *http.Request) {
-	log.Println("hello world")
-
-	d, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Oops", http.StatusBadRequest)
-	}
-	_, err = fmt.Fprintf(w, "hello %s", d)
-	if err != nil {
-		log.Println(err)
 	}
 }
