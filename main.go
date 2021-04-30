@@ -11,21 +11,18 @@ import (
 	"github.com/nikolasnorth/microservices/handlers"
 )
 
-var PORT = "9090"
+var port = "9090"
 
 func main() {
-	l := log.New(os.Stdout, "hello-handler:", log.LstdFlags)
-	hh := handlers.NewHello(l)
-	gh := handlers.NewGoodbye(l)
+	l := log.New(os.Stdout, "products: ", log.LstdFlags)
+
+	ph := handlers.NewProducts(l)
 
 	sm := http.NewServeMux()
-	sm.Handle("/", hh)
-	sm.Handle("/goodbye", gh)
-
-	l.Printf("listening on port %s...", PORT)
+	sm.Handle("/", ph)
 
 	s := &http.Server{
-		Addr:         ":" + PORT,
+		Addr:         ":" + port,
 		Handler:      sm,
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  1 * time.Second,
@@ -37,13 +34,14 @@ func main() {
 			l.Fatal(err)
 		}
 	}()
+	l.Printf("listening on port %s...", port)
 
-	// Listen for SIGINT signal
+	// Listen for SIGINT
 	sigChan := make(chan os.Signal)
 	signal.Notify(sigChan, os.Interrupt)
 	signal.Notify(sigChan, os.Kill)
 
-	// Will block until SIGINT happens
+	// Block until SIGINT happens
 	sig := <-sigChan
 	l.Println("Received terminate, graceful shutdown", sig)
 
