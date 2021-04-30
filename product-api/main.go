@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/nikolasnorth/microservices/handlers"
+	"github.com/nikolasnorth/microservices/product-api/handlers"
 )
 
 var port = "9090"

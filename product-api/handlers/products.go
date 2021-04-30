@@ -17,13 +17,13 @@ func NewProducts(l *log.Logger) *Products {
 
 func (p *Products) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		p.getProducts(w, r)
+		p.getProducts(w)
 	}
 
 	w.WriteHeader(http.StatusMethodNotAllowed)
 }
 
-func (p *Products) getProducts(w http.ResponseWriter, r *http.Request) {
+func (p *Products) getProducts(w http.ResponseWriter) {
 	lp := data.GetProducts()
 	err := lp.ToJSON(w)
 	if err != nil {
