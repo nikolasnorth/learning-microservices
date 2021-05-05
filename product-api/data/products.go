@@ -2,9 +2,12 @@ package data
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"time"
 )
+
+var ErrProductNotFound = errors.New("product not found")
 
 type Product struct {
 	ID        int     `json:"id"`
@@ -53,6 +56,26 @@ func GetProducts() Products {
 func AddProduct(p *Product) {
 	p.ID = getNextID()
 	productList = append(productList, p)
+}
+
+func UpdateProduct(p *Product, id int) error {
+	_, i, err := FindProduct(id)
+	if err != nil {
+		return err
+	}
+	p.ID = id
+	productList[i] = p
+	return nil
+}
+
+// Simulate find Product by id database query
+func FindProduct(id int) (*Product, int, error) {
+	for i, p := range productList {
+		if p.ID == id {
+			return p, i, nil
+		}
+	}
+	return nil, 0, ErrProductNotFound
 }
 
 // Simulate function to generate unique ID

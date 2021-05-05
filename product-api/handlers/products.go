@@ -41,7 +41,7 @@ func (p *Products) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 
-		p.l.Println("Got ID", id)
+		p.updateProduct(id, w, r)
 	}
 
 	w.WriteHeader(http.StatusMethodNotAllowed)
@@ -69,4 +69,22 @@ func (p *Products) addProduct(w http.ResponseWriter, r *http.Request) {
 
 	p.l.Printf("Prod: %#v", prod)
 	data.AddProduct(prod)
+}
+
+func (p *Products) updateProduct(id int, w http.ResponseWriter, r *http.Request) {
+	p.l.Println("Handle PUT Product")
+
+	prod := &data.Product{}
+	err := prod.FromJSON(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	err = data.UpdateProduct(prod, id)
+	if err != nil {
+		if err == data.ErrProductNotFound {
+			http.Error(w, "Product not found", http.StatusNotFound)
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
