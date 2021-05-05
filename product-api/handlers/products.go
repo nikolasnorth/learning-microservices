@@ -3,6 +3,8 @@ package handlers
 import (
 	"log"
 	"net/http"
+	"regexp"
+	"strconv"
 
 	"github.com/nikolasnorth/microservices/product-api/data"
 )
@@ -23,6 +25,23 @@ func (p *Products) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		p.addProduct(w, r)
 		return
+	}
+	if r.Method == http.MethodPut {
+		// Grab id from request
+		path := r.URL.Path
+		reg := regexp.MustCompile(`/([0-9]+)`)
+
+		subs := reg.FindAllStringSubmatch(path, -1)
+		if len(subs) != 1 || len(subs[0]) != 2 {
+			http.Error(w, "Request must contain exactly one ID", http.StatusBadRequest)
+			return
+		}
+		id, err := strconv.Atoi(subs[0][1])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+
+		p.l.Println("Got ID", id)
 	}
 
 	w.WriteHeader(http.StatusMethodNotAllowed)
